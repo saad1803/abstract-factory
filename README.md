@@ -1,199 +1,47 @@
----
-layout: pattern
-title: Abstract Factory
-folder: abstract-factory
-permalink: /patterns/abstract-factory/
-categories: Creational
-tags:
- - Java
- - Gang Of Four
- - Difficulty-Intermediate
----
+<!-- the line below needs to be an empty line C: (its because kramdown isnt
+     that smart and dearly wants an empty line before a heading to be able to
+     display it as such, e.g. website) -->
 
-## Also known as
-Kit
+# Design patterns implemented in Java
 
-## Intent
-Provide an interface for creating families of related or dependent
-objects without specifying their concrete classes.
+[![Build status](https://travis-ci.org/iluwatar/java-design-patterns.svg?branch=master)](https://travis-ci.org/iluwatar/java-design-patterns)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iluwatar/java-design-patterns/master/LICENSE.md)
+[![Join the chat at https://gitter.im/iluwatar/java-design-patterns](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/iluwatar/java-design-patterns?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.iluwatar%3Ajava-design-patterns&metric=alert_status)](https://sonarcloud.io/dashboard/index/com.iluwatar%3Ajava-design-patterns)
 
-## Explanation
-Real world example
+# Introduction
 
-> To create a kingdom we need objects with common theme. Elven kingdom needs an Elven king, Elven castle and Elven army whereas Orcish kingdom needs an Orcish king, Orcish castle and Orcish army. There is a dependency between the objects in the kingdom.
+Design patterns are formalized best practices that the programmer can use to
+solve common problems when designing an application or system.
 
-In plain words
+Design patterns can speed up the development process by providing tested, proven
+development paradigms.
 
-> A factory of factories; a factory that groups the individual but related/dependent factories together without specifying their concrete classes.
+Reusing design patterns helps to prevent subtle issues that can cause major
+problems, and it also improves code readability for coders and architects who
+are familiar with the patterns.
 
-Wikipedia says
+# Getting started
 
-> The abstract factory pattern provides a way to encapsulate a group of individual factories that have a common theme without specifying their concrete classes
+Before you dive into the material, you should be familiar with various
+Programming/Software Design Principles.
 
-**Programmatic Example**
+All designs should be as simple as possible. You should start with KISS, YAGNI,
+and Do The Simplest Thing That Could Possibly Work principles. Complexity and
+patterns should only be introduced when they are needed for practical
+extensibility.
 
-Translating the kingdom example above. First of all we have some interfaces and implementation for the objects in the kingdom
+Once you are familiar with these concepts you can start drilling down into
+patterns by any of the following approaches
 
-```java
-public interface Castle {
-  String getDescription();
-}
-public interface King {
-  String getDescription();
-}
-public interface Army {
-  String getDescription();
-}
+ - Using difficulty tags, `Difficulty-Beginner`, `Difficulty-Intermediate` & `Difficulty-Expert`.
+ - Using pattern categories, `Creational`, `Behavioral` and others.
+ - Search for a specific pattern. Can't find one? Please report a new pattern [here](https://github.com/iluwatar/java-design-patterns/issues).
 
-// Elven implementations ->
-public class ElfCastle implements Castle {
-  static final String DESCRIPTION = "This is the Elven castle!";
-  @Override
-  public String getDescription() {
-    return DESCRIPTION;
-  }
-}
-public class ElfKing implements King {
-  static final String DESCRIPTION = "This is the Elven king!";
-  @Override
-  public String getDescription() {
-    return DESCRIPTION;
-  }
-}
-public class ElfArmy implements Army {
-  static final String DESCRIPTION = "This is the Elven Army!";
-  @Override
-  public String getDescription() {
-    return DESCRIPTION;
-  }
-}
+# How to contribute
 
-// Orcish implementations similarly...
+If you are willing to contribute to the project you will find the relevant information in our [developer wiki](https://github.com/iluwatar/java-design-patterns/wiki). We will help you and answer your questions in the [Gitter chatroom](https://gitter.im/iluwatar/java-design-patterns).
 
-```
+# License
 
-Then we have the abstraction and implementations for the kingdom factory
-
-```java
-public interface KingdomFactory {
-  Castle createCastle();
-  King createKing();
-  Army createArmy();
-}
-
-public class ElfKingdomFactory implements KingdomFactory {
-  public Castle createCastle() {
-    return new ElfCastle();
-  }
-  public King createKing() {
-    return new ElfKing();
-  }
-  public Army createArmy() {
-    return new ElfArmy();
-  }
-}
-
-public class OrcKingdomFactory implements KingdomFactory {
-  public Castle createCastle() {
-    return new OrcCastle();
-  }
-  public King createKing() {
-    return new OrcKing();
-  }
-  public Army createArmy() {
-    return new OrcArmy();
-  }
-}
-```
-
-Now we have our abstract factory that lets us make family of related objects i.e. Elven kingdom factory creates Elven castle, king and army etc.
-
-```java
-KingdomFactory factory = new ElfKingdomFactory();
-Castle castle = factory.createCastle();
-King king = factory.createKing();
-Army army = factory.createArmy();
-
-castle.getDescription();  // Output: This is the Elven castle!
-king.getDescription(); // Output: This is the Elven king!
-army.getDescription(); // Output: This is the Elven Army!
-```
-
-Now, we can design a factory for our different kingdom factories. In this example, we created FactoryMaker, responsible for returning an instance of either ElfKingdomFactory or OrcKingdomFactory.  
-The client can use FactoryMaker to create the desired concrete factory which, in turn, will produce different concrete objects (Army, King, Castle).  
-In this example, we also used an enum to parameterize which type of kingdom factory the client will ask for.
-
-```java
-public static class FactoryMaker {
-
-  public enum KingdomType {
-    ELF, ORC
-  }
-
-  public static KingdomFactory makeFactory(KingdomType type) {
-    switch (type) {
-      case ELF:
-        return new ElfKingdomFactory();
-      case ORC:
-        return new OrcKingdomFactory();
-      default:
-        throw new IllegalArgumentException("KingdomType not supported.");
-    }
-  }
-}
-
-public static void main(String[] args) {
-  App app = new App();
-
-  LOGGER.info("Elf Kingdom");
-  app.createKingdom(FactoryMaker.makeFactory(KingdomType.ELF));
-  LOGGER.info(app.getArmy().getDescription());
-  LOGGER.info(app.getCastle().getDescription());
-  LOGGER.info(app.getKing().getDescription());
-
-  LOGGER.info("Orc Kingdom");
-  app.createKingdom(FactoryMaker.makeFactory(KingdomType.ORC));
-  -- similar use of the orc factory
-}
-```
-
-
-## Applicability
-Use the Abstract Factory pattern when
-
-* a system should be independent of how its products are created, composed and represented
-* a system should be configured with one of multiple families of products
-* a family of related product objects is designed to be used together, and you need to enforce this constraint
-* you want to provide a class library of products, and you want to reveal just their interfaces, not their implementations
-* the lifetime of the dependency is conceptually shorter than the lifetime of the consumer.
-*	you need a run-time value to construct a particular dependency
-*	you want to decide which product to call from a family at runtime.
-*	you need to supply one or more parameters only known at run-time before you can resolve a dependency.
-
-## Use Cases:	
-
-*	Selecting to call the appropriate implementation of FileSystemAcmeService or DatabaseAcmeService or NetworkAcmeService at runtime.
-*	Unit test case writing becomes much easier
-
-## Consequences:
-
-*	Dependency injection in java hides the service class dependencies that can lead to runtime errors that would have been caught at compile time.
-
-
-## Tutorial
-* [Abstract Factory Pattern Tutorial](https://www.journaldev.com/1418/abstract-factory-design-pattern-in-java) 
-
-## Presentations
-
-* [Abstract Factory Pattern](etc/presentation.html) 
-
-
-## Real world examples
-
-* [javax.xml.parsers.DocumentBuilderFactory](http://docs.oracle.com/javase/8/docs/api/javax/xml/parsers/DocumentBuilderFactory.html)
-* [javax.xml.transform.TransformerFactory](http://docs.oracle.com/javase/8/docs/api/javax/xml/transform/TransformerFactory.html#newInstance--)
-* [javax.xml.xpath.XPathFactory](http://docs.oracle.com/javase/8/docs/api/javax/xml/xpath/XPathFactory.html#newInstance--)
-
-## Credits
-
-* [Design Patterns: Elements of Reusable Object-Oriented Software](http://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612)
+This project is licensed under the terms of the MIT license.
